@@ -1,0 +1,6 @@
+/elasticsearch/data/nodes/
+/elasticsearch/data/nodes/0/
+/elasticsearch/data/nodes/0/_state/
+/elasticsearch/data/nodes/0/indices/
+/elasticsearch/data/nodes/0/snapshot_cache/
+/elasticsearch/data/nodes/0/node.lock

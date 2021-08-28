@@ -1,0 +1,96 @@
+version: "3.6"
+services:
+  canal-admin:
+    image: canal/canal-admin:v1.1.5
+    container_name: canal-admin
+    environment:
+      - spring.datasource.address=mysql:3306
+      - spring.datasource.database=canal_manager
+      - spring.datasource.username=root
+      - spring.datasource.password=123456
+    restart: always
+    volumes:
+      - ./canal-admin/conf/canal-template.properties:/home/admin/canal-admin/conf/canal-template.properties
+      - ./canal-admin/conf/instance-template.properties:/home/admin/canal-admin/conf/instance-template.properties
+      - ./canal-admin/logs:/home/admin/canal-admin/logs
+    ports:
+      - "8089:8089"
+    networks:
+      sync-work:
+        ipv4_address: 192.18.0.2
+    links:
+      - mysql
+    depends_on:
+      - mysql
+  canal-server:
+    image: canal/canal-server:v1.1.5
+    container_name: canal-server
+    restart: always
+    volumes:
+#      - ./canal-server/conf:/home/admin/canal-server/conf
+      - ./canal-server/logs:/home/admin/canal-server/logs
+    ports:
+      - "11110:11110"
+      - "11111:11111"
+      - "11112:11112"
+      - "9100:9100"
+    networks:
+      sync-work:
+        ipv4_address: 192.18.0.3
+    links:
+      - mysql
+  elasticsearch:
+    image: elasticsearch:7.14.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"    
+    restart: always
+    volumes:
+      - ./elasticsearch/data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    networks:
+      sync-work:
+        ipv4_address: 192.18.0.4
+  kibana:
+    image: kibana:7.14.0
+    container_name: kibana
+    environment:
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+#    volumes:
+#      - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml
+    restart: always
+    ports:
+      - "5601:5601"
+    links:
+      - elasticsearch
+    depends_on:
+      - elasticsearch
+    networks:
+      sync-work:
+        ipv4_address: 192.18.0.5
+  mysql:
+    image: mysql:5.7.35
+    container_name: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ./mysql/conf.d/docker.cnf:/etc/mysql/conf.d/docker.cnf
+      - ./mysql/init-db:/docker-entrypoint-initdb.d
+      - ./mysql/data:/var/lib/mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+    networks:
+      sync-work:
+        ipv4_address: 192.18.0.6
+networks:
+  sync-work:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.18.0.0/24

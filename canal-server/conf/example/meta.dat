@@ -1,0 +1,1 @@
+{"clientDatas":[{"clientIdentity":{"clientId":1001,"destination":"example","filter":"yt_bi\\..*"},"cursor":{"identity":{"slaveId":-1,"sourceAddress":{"address":"mysql.sit.yintaerp.com","port":3306}},"postion":{"gtid":"","included":false,"journalName":"master.000508","position":478128309,"serverId":1,"timestamp":1630047622000}}}],"destination":"example"}
