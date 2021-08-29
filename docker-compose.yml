@@ -57,10 +57,10 @@ services:
   kibana:
     image: kibana:7.14.0
     container_name: kibana
-    environment:
-      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
-#    volumes:
-#      - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml
+    #environment:
+      #ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+    volumes:
+      - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml
     restart: always
     ports:
       - "5601:5601"
