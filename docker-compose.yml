@@ -27,7 +27,7 @@ services:
     container_name: canal-server
     restart: always
     volumes:
-#      - ./canal-server/conf:/home/admin/canal-server/conf
+      - ./canal-server/conf/sit:/home/admin/canal-server/conf/sit
       - ./canal-server/logs:/home/admin/canal-server/logs
     ports:
       - "11110:11110"
@@ -49,6 +49,7 @@ services:
     restart: always
     volumes:
       - ./elasticsearch/data:/usr/share/elasticsearch/data
+      - ./elasticsearch/logs:/usr/share/elasticsearch/logs
     ports:
       - "9200:9200"
     networks:
@@ -61,6 +62,7 @@ services:
       #ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
     volumes:
       - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml
+      - ./kibana/logs:/usr/share/kibana/logs
     restart: always
     ports:
       - "5601:5601"
@@ -87,6 +89,34 @@ services:
     networks:
       sync-work:
         ipv4_address: 192.18.0.6
+  nacos:
+    image: nacos/nacos-server:1.4.2
+    container_name: nacos
+    environment:
+      - PREFER_HOST_MODE=hostname
+      - MODE=standalone
+      - SPRING_DATASOURCE_PLATFORM=mysql
+      - MYSQL_SERVICE_HOST=mysql
+      - MYSQL_SERVICE_PORT=3306
+      - MYSQL_SERVICE_USER=root
+      - MYSQL_SERVICE_PASSWORD=123456
+      - MYSQL_SERVICE_DB_NAME=nacos_config
+      - JVM_XMS=512m
+      - JVM_XMX=512m
+      - JVM_XMN=256m
+    volumes:
+      - ./nacos/logs:/home/nacos/logs
+      - ./nacos/init-d/custom.properties:/home/nacos/init.d/custom.properties
+    ports:
+      - "8848:8848"
+    restart: always
+    depends_on:
+      - mysql
+    links:
+      - mysql
+    networks:
+      sync-work:
+        ipv4_address: 192.18.0.7
 networks:
   sync-work:
     driver: bridge

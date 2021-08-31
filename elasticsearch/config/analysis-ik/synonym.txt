@@ -1,3 +1,0 @@
-wuhan,武汉
-china,中国
-test,测试
