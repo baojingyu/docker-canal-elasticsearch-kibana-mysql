@@ -45,7 +45,7 @@ services:
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"    
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     restart: always
     volumes:
       - ./elasticsearch/data:/usr/share/elasticsearch/data
@@ -55,6 +55,12 @@ services:
     networks:
       sync-work:
         ipv4_address: 192.18.0.4
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+        reservations:
+          memory: 256M
   kibana:
     image: kibana:7.14.0
     container_name: kibana
@@ -86,21 +92,31 @@ services:
       - "3306:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=nacos_devtest
+      - MYSQL_USER=nacos
+      - MYSQL_PASSWORD=nacos
     networks:
       sync-work:
         ipv4_address: 192.18.0.6
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+        reservations:
+          memory: 256M
   nacos:
-    image: nacos/nacos-server:1.4.2
+    image: nacos/nacos-server
     container_name: nacos
     environment:
       - PREFER_HOST_MODE=hostname
       - MODE=standalone
       - SPRING_DATASOURCE_PLATFORM=mysql
-      - MYSQL_SERVICE_HOST=mysql
+      - MYSQL_SERVICE_HOST=192.18.0.6
+      - MYSQL_SERVICE_DB_NAME=nacos_devtest
       - MYSQL_SERVICE_PORT=3306
       - MYSQL_SERVICE_USER=root
       - MYSQL_SERVICE_PASSWORD=123456
-      - MYSQL_SERVICE_DB_NAME=nacos_config
+      - MYSQL_SERVICE_DB_PARAM=characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useSSL=false
       - JVM_XMS=512m
       - JVM_XMX=512m
       - JVM_XMN=256m
@@ -109,7 +125,6 @@ services:
       - ./nacos/init-d/custom.properties:/home/nacos/init.d/custom.properties
     ports:
       - "8848:8848"
-    restart: always
     depends_on:
       - mysql
     links:
@@ -117,6 +132,12 @@ services:
     networks:
       sync-work:
         ipv4_address: 192.18.0.7
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+        reservations:
+          memory: 256M
 networks:
   sync-work:
     driver: bridge
